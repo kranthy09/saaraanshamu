@@ -5,8 +5,6 @@ Aerich configuration variables
 import logging
 import os
 
-from fastapi import FastAPI
-
 from tortoise import Tortoise, run_async
 
 log = logging.getLogger("uvicorn")
