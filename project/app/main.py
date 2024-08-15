@@ -3,30 +3,44 @@ Application instance
 """
 
 import os
+import logging
+
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Depends
-from tortoise.contrib.fastapi import register_tortoise
 
-from app.config import Settings, get_settings
+from tortoise.contrib.fastapi import RegisterTortoise
 
-app = FastAPI()
+from app.api import ping
 
-register_tortoise(
-    app,
-    db_url=os.environ.get("DATABASE_URL"),
-    modules={"models": ["app.models.tortoise"]},
-    generate_schemas=False,
-    add_exception_handlers=True,
-)
+log = logging.getLogger("uvicorn")
 
 
-@app.get("/ping")
-async def pong(settings: Settings = Depends(get_settings)):
-    """
-    Pong endpoint for health checks
-    """
-    return {
-        "ping": "pong!",
-        "environment": settings.environment,
-        "testing": settings.testing,
-    }
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """establishing db connnection with lifespan"""
+
+    log.info("Starting up...")
+    async with RegisterTortoise(
+        app,
+        db_url=os.environ.get("DATABASE_URL"),
+        modules={"models": ["app.models.tortoise"]},
+        generate_schemas=False,
+        add_exception_handlers=True,
+    ):
+        yield
+
+        log.info("Shutting down...")
+
+
+def create_application(eventhandler):
+    """Helper function to create a application"""
+
+    application = FastAPI(lifespan=eventhandler)
+
+    application.include_router(ping.router)
+
+    return application
+
+
+app = create_application(eventhandler=lifespan)
