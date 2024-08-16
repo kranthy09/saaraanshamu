@@ -7,11 +7,11 @@ import logging
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 
 from tortoise.contrib.fastapi import RegisterTortoise
 
-from app.api import ping
+from app.api import ping, users
 
 log = logging.getLogger("uvicorn")
 
@@ -39,6 +39,7 @@ def create_application(eventhandler):
     application = FastAPI(lifespan=eventhandler)
 
     application.include_router(ping.router)
+    application.include_router(users.router)
 
     return application
 
