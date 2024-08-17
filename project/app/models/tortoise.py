@@ -22,6 +22,7 @@ class AppUser(models.Model):
     username = fields.TextField()
     hashed_password = fields.TextField()
     created_at = fields.DatetimeField(auto_now_add=True)
+    disabled = fields.BooleanField(default=False)
 
     def __str__(self):
         return self.username

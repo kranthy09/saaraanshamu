@@ -29,5 +29,5 @@ class UserIndb(BaseModel):
     """User representation in db"""
 
     username: str
-    hashed_password: str = None
     created_at: datetime = None
+    disabled: bool = False
